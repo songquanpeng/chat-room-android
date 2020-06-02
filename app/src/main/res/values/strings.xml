@@ -20,4 +20,9 @@
     <string name="save_setting_btn">Save</string>
     <string name="room_id_label">Room ID</string>
     <string name="room_id">Name</string>
+    <string name="disconnect">Disconnected</string>
+    <string name="connect">Connected</string>
+    <string name="connect_error">Connect error</string>
+    <string name="conflict_username">Conflicted username</string>
+    <string name="register_success">Register success</string>
 </resources>
