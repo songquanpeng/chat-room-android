@@ -23,7 +23,7 @@ tools:showIn="@layout/app_bar_main">
     android:orientation="horizontal">
 
     <EditText
-        android:id="@+id/et_input_text"
+        android:id="@+id/message_input"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center"
@@ -35,7 +35,7 @@ tools:showIn="@layout/app_bar_main">
         android:autofillHints="" />
 
     <Button
-        android:id="@+id/btn_send_message"
+        android:id="@+id/send_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
