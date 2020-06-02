@@ -1,4 +1,4 @@
-package com.song.chat.ui.home;
+package com.song.chat;
 
 import android.os.Bundle;
 import android.util.Log;
