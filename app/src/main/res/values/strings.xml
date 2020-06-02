@@ -14,4 +14,10 @@
     <string name="home_second">Home Second</string>
     <string name="input_hint">Type here</string>
     <string name="send">Send</string>
+    <string name="help_content">Usage: \nSend image: long press the send button.</string>
+    <string name="server_label">Server Address</string>
+    <string name="username_label">Username</string>
+    <string name="save_setting_btn">Save</string>
+    <string name="room_id_label">Room ID</string>
+    <string name="room_id">Name</string>
 </resources>
