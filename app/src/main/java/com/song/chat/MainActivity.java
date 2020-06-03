@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Connection connection;
     private String username;
     private String serverAddress;
+    private String roomID;
     private List<Message> messageList = new ArrayList<>();
     private RecyclerView messageRecyclerView;
     private MessageAdapter messageAdapter;
@@ -71,15 +72,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize web socket connection
         connection = Connection.getInstance();
         sharedPreferences = getSharedPreferences("data", Context.MODE_PRIVATE);
-        serverAddress = sharedPreferences.getString("serverAddress", "https://chat.iamazing.cn/");
-        username = sharedPreferences.getString("username", "Default Username");
-        String roomID = sharedPreferences.getString("roomID", "/");
-        connection.init(serverAddress, username, roomID,
-                onConnect, onDisconnect,
-                onConnectError, onMessage,
-                onConflictUsername, onRegisterSuccess);
-
-
+        connection.init(onConnect, onDisconnect, onConnectError, onMessage, onConflictUsername,
+                onRegisterSuccess);
+        // Initialize UI
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -95,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         messageInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId == EditorInfo.IME_ACTION_SEND){
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
                     sendTextMessage();
                 }
                 return true;
@@ -126,6 +121,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         messageRecyclerView.setLayoutManager(layoutManager);
         messageAdapter = new MessageAdapter(messageList, this, serverAddress);
         messageRecyclerView.setAdapter(messageAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        serverAddress = sharedPreferences.getString("serverAddress", "https://chat.iamazing.cn/");
+        username = sharedPreferences.getString("username", "Default Username");
+        roomID = sharedPreferences.getString("roomID", "/");
+        connection.connect(this.serverAddress, this.username, this.roomID);
     }
 
     @Override
@@ -232,7 +236,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onDestroy() {
         super.onDestroy();
-        connection.destroy();
     }
 
     @Override
@@ -386,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         username = edit.getText().toString().trim();
-                        connection.registerUsername(username);
+                        connection.connect(serverAddress, username, roomID);
                         saveUsername(username);
                         dialog.dismiss();
                     }

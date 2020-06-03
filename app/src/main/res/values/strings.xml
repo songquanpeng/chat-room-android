@@ -14,7 +14,7 @@
     <string name="home_second">Home Second</string>
     <string name="input_hint">Type here</string>
     <string name="send">Send</string>
-    <string name="help_content">Usage: \nSend image: long press the send button.</string>
+    <string name="help_content">Send image: \nlong press the send button.\n\nGithub address: \nhttps://github.com/songquanpeng/chat-room-android\n\nDisclaimer:\nOnly for study and research, please do not use for other purposes, otherwise you will be at your own risk!</string>
     <string name="server_label">Server Address</string>
     <string name="username_label">Username</string>
     <string name="save_setting_btn">Save</string>

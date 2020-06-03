@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +28,15 @@ public class SettingActivity extends AppCompatActivity {
         serverEditText = this.findViewById(R.id.serverEditText);
         usernameEditText = this.findViewById(R.id.usernameEditText);
         roomIDEditText = this.findViewById(R.id.roomIDEditText);
+        roomIDEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    save();
+                }
+                return true;
+            }
+        });
         Button saveBtn = this.findViewById(R.id.save_setting_btn);
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -52,7 +64,7 @@ public class SettingActivity extends AppCompatActivity {
         editor.putString("username", username);
         editor.putString("roomID", roomID);
         editor.apply();
-        Toast.makeText(this, "Setting saved, please restart the application to apply",
+        Toast.makeText(this, "Setting saved",
                 Toast.LENGTH_LONG).show();
     }
 

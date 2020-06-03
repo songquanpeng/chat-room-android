@@ -14,42 +14,59 @@ import io.socket.emitter.Emitter;
 
 class Connection {
     private static Connection instance = new Connection();
+    private String serverAddress;
+    private String username;
     private String roomID;
     private Socket socket;
+    private Emitter.Listener onConnect;
+    private Emitter.Listener onDisconnect;
+    private Emitter.Listener onConnectError;
+    private Emitter.Listener onMessage;
+    private Emitter.Listener onConflictUsername;
+    private Emitter.Listener onRegisterSuccess;
 
     private Connection() {
     }
 
-    void init(String serverAddress, String username, String roomID,
-              Emitter.Listener onConnect, Emitter.Listener onDisconnect,
+    void init(Emitter.Listener onConnect, Emitter.Listener onDisconnect,
               Emitter.Listener onConnectError, Emitter.Listener onMessage,
               Emitter.Listener onConflictUsername, Emitter.Listener onRegisterSuccess) {
-        this.roomID = roomID;
-        try {
-            socket = IO.socket(serverAddress);
-        } catch (URISyntaxException e) {
-            Log.e("cannot initialize socket", e.toString());
-            e.printStackTrace();
-            return;
-        }
-        socket.on(Socket.EVENT_CONNECT, onConnect);
-        socket.on(Socket.EVENT_DISCONNECT, onDisconnect);
-        socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        socket.on("message", onMessage);
-        socket.on("conflict username", onConflictUsername);
-        socket.on("register success", onRegisterSuccess);
-        socket.connect();
-        registerUsername(username);
+        this.onConnect = onConnect;
+        this.onDisconnect = onDisconnect;
+        this.onConnectError = onConnectError;
+        this.onMessage = onMessage;
+        this.onConflictUsername = onConflictUsername;
+        this.onRegisterSuccess = onRegisterSuccess;
     }
 
-    void registerUsername(String username) {
-        if (socket != null) {
-            socket.emit("register", username, roomID);
+    void connect(String serverAddress, String username, String roomID) {
+        if (!serverAddress.equals(this.serverAddress) || !username.equals(this.username) || !roomID.equals(this.roomID)) {
+            disconnect();
+            this.serverAddress = serverAddress;
+            this.username = username;
+            this.roomID = roomID;
+            try {
+                socket = IO.socket(serverAddress);
+            } catch (URISyntaxException e) {
+                Log.e("cannot initialize socket", e.toString());
+                e.printStackTrace();
+                return;
+            }
+            socket.on(Socket.EVENT_CONNECT, onConnect);
+            socket.on(Socket.EVENT_DISCONNECT, onDisconnect);
+            socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            socket.on("message", onMessage);
+            socket.on("conflict username", onConflictUsername);
+            socket.on("register success", onRegisterSuccess);
+            socket.connect();
+            if (socket != null) {
+                socket.emit("register", username, roomID);
+            }
         }
     }
 
-    void destroy() {
+    void disconnect() {
         if (socket != null) socket.disconnect();
     }
 
