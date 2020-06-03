@@ -46,10 +46,10 @@ class Connection {
         socket.on("conflict username", onConflictUsername);
         socket.on("register success", onRegisterSuccess);
         socket.connect();
-        registerUsername();
+        registerUsername(username);
     }
 
-    private void registerUsername() {
+    void registerUsername(String username) {
         if (socket != null) {
             socket.emit("register", username, roomID);
         }

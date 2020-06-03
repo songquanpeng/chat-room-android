@@ -1,6 +1,7 @@
 package com.song.chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,13 +41,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private List<Message> messageList = new ArrayList<>();
     private RecyclerView messageRecyclerView;
     private MessageAdapter messageAdapter;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Initialize web socket connection
         connection = Connection.getInstance();
-        SharedPreferences sharedPreferences = getSharedPreferences("data", Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("data", Context.MODE_PRIVATE);
         String serverAddress = sharedPreferences.getString("serverAddress", "https://chat.iamazing.cn/");
         username = sharedPreferences.getString("username", "Default Username");
         String roomID = sharedPreferences.getString("roomID", "/");
@@ -93,6 +96,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        connection.destroy();
+    }
+
+    @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -106,6 +115,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.setting_btn) {
+            Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -140,8 +159,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getApplicationContext(),
-                            R.string.connect, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -188,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         sender = data.getString("sender");
                         type = data.getString("type");
                         Log.i("receive message", data.toString());
-                        // TODO: Update UI
                         Message message = new Message(content, sender, type, username.equals(sender));
                         messageList.add(message);
                         messageAdapter.notifyItemInserted(messageList.size() - 1);
@@ -209,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void run() {
                     Toast.makeText(getApplicationContext(),
                             R.string.conflict_username, Toast.LENGTH_LONG).show();
+                    requireNewUsername();
                 }
             });
         }
@@ -220,10 +237,37 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getApplicationContext(),
-                            R.string.register_success, Toast.LENGTH_LONG).show();
                 }
             });
         }
     };
+
+    void requireNewUsername() {
+        final EditText edit = new EditText(this);
+        AlertDialog.Builder inputDialog = new AlertDialog.Builder(this);
+        inputDialog.setTitle(getString(R.string.dialog_require_username));
+        inputDialog.setMessage("Please input: ");
+        inputDialog.setIcon(R.drawable.ic_launcher);
+        inputDialog.setView(edit);
+        inputDialog.setPositiveButton(getString(R.string.dialog_btn_confirm_text)
+                , new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        username = edit.getText().toString().trim();
+                        connection.registerUsername(username);
+                        saveUsername(username);
+                        dialog.dismiss();
+                    }
+                });
+
+        inputDialog.create().show();
+    }
+
+    void saveUsername(String username) {
+        this.username = username;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("username", username);
+        editor.apply();
+    }
 }
+

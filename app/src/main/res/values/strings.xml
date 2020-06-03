@@ -17,14 +17,16 @@
     <string name="help_content">Usage: \nSend image: long press the send button.</string>
     <string name="server_label">Server Address</string>
     <string name="username_label">Username</string>
-    <string name="save_setting_btn">Save</string>
+    <string name="save_setting_btn">Save &amp; Restart</string>
     <string name="room_id_label">Room ID</string>
     <string name="room_id">Name</string>
     <string name="disconnect">Disconnected</string>
     <string name="connect">Connected</string>
-    <string name="connect_error">Connect error</string>
+    <string name="connect_error">Connect error, try restart this application!</string>
     <string name="conflict_username">Conflicted username</string>
     <string name="register_success">Register success</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_setting">Setting</string>
+    <string name="dialog_require_username">Register a new username</string>
+    <string name="dialog_btn_confirm_text">OK</string>
 </resources>
