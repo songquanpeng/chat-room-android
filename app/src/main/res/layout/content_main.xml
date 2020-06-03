@@ -35,7 +35,8 @@
                 android:layout_weight="1"
                 android:background="@color/colorEditTextBackGround"
                 android:hint="@string/input_hint"
-                android:maxLines="2"
+                android:singleLine="true"
+                android:imeOptions="actionSend"
                 android:inputType="text"
                 android:autofillHints="" />
 
