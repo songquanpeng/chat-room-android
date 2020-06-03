@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         messageRecyclerView = findViewById(R.id.msg_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         messageRecyclerView.setLayoutManager(layoutManager);
-        messageAdapter = new MessageAdapter(messageList, this, serverAddress);
+        messageAdapter = new MessageAdapter(messageList, this);
         messageRecyclerView.setAdapter(messageAdapter);
     }
 

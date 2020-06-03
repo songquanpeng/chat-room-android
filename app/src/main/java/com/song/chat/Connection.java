@@ -14,7 +14,7 @@ import io.socket.emitter.Emitter;
 
 class Connection {
     private static Connection instance = new Connection();
-    private String serverAddress;
+    static String serverAddress;
     private String username;
     private String roomID;
     private Socket socket;
@@ -40,9 +40,9 @@ class Connection {
     }
 
     void connect(String serverAddress, String username, String roomID) {
-        if (!serverAddress.equals(this.serverAddress) || !username.equals(this.username) || !roomID.equals(this.roomID)) {
+        if (!serverAddress.equals(Connection.serverAddress) || !username.equals(this.username) || !roomID.equals(this.roomID)) {
             disconnect();
-            this.serverAddress = serverAddress;
+            Connection.serverAddress = serverAddress;
             this.username = username;
             this.roomID = roomID;
             try {
@@ -66,7 +66,7 @@ class Connection {
         }
     }
 
-    void disconnect() {
+    private void disconnect() {
         if (socket != null) socket.disconnect();
     }
 
