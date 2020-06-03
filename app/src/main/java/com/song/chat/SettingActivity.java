@@ -1,9 +1,6 @@
 package com.song.chat;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,17 +52,8 @@ public class SettingActivity extends AppCompatActivity {
         editor.putString("username", username);
         editor.putString("roomID", roomID);
         editor.apply();
-        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, MainActivity.class);
-        int intentID = 20170607;
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, intentID,
-                intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        if (alarmManager != null) {
-            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
-
-        }
-        this.finish();
+        Toast.makeText(this, "Setting saved, please restart the application to apply",
+                Toast.LENGTH_LONG).show();
     }
 
     private void load() {

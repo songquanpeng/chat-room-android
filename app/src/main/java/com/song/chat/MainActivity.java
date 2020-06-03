@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +19,7 @@ import android.widget.Toast;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
@@ -28,16 +32,31 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.socket.emitter.Emitter;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
+    public static final int CHOOSE_FROM_ALBUM = 100;
+    public static final String TAG = "MAIN_ACTIVITY";
     private EditText messageInput;
     private Connection connection;
     private String username;
+    private String serverAddress;
     private List<Message> messageList = new ArrayList<>();
     private RecyclerView messageRecyclerView;
     private MessageAdapter messageAdapter;
@@ -49,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize web socket connection
         connection = Connection.getInstance();
         sharedPreferences = getSharedPreferences("data", Context.MODE_PRIVATE);
-        String serverAddress = sharedPreferences.getString("serverAddress", "https://chat.iamazing.cn/");
+        serverAddress = sharedPreferences.getString("serverAddress", "https://chat.iamazing.cn/");
         username = sharedPreferences.getString("username", "Default Username");
         String roomID = sharedPreferences.getString("roomID", "/");
         connection.init(serverAddress, username, roomID,
@@ -74,16 +93,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("user", "click send btn");
-                sendBtnClicked(true);
+                Log.i(TAG, "user click send btn");
+                sendTextMessage();
             }
         });
         sendBtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Log.i("user", "long click send btn");
-                sendBtnClicked(false);
-                return false;
+                Log.i(TAG, "user long click send btn");
+                Intent intent = new Intent("android.intent.action.GET_CONTENT");
+                intent.setType("image/*");
+                startActivityForResult(intent, CHOOSE_FROM_ALBUM);
+                return true;
             }
         });
 
@@ -91,8 +112,109 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         messageRecyclerView = findViewById(R.id.msg_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         messageRecyclerView.setLayoutManager(layoutManager);
-        messageAdapter = new MessageAdapter(messageList);
+        messageAdapter = new MessageAdapter(messageList, this, serverAddress);
         messageRecyclerView.setAdapter(messageAdapter);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHOOSE_FROM_ALBUM) {
+            if (resultCode == RESULT_OK) {
+                try {
+                    if (data != null) {
+                        File file = getImageFromUri(data.getData());
+                        if (file != null) {
+                            uploadImage(file);
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private File getImageFromUri(Uri uri) throws IOException {
+        InputStream input = getContentResolver().openInputStream(uri);
+        BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
+        onlyBoundsOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
+        if (input != null) {
+            input.close();
+        }
+        int originalWidth = onlyBoundsOptions.outWidth;
+        int originalHeight = onlyBoundsOptions.outHeight;
+        if ((originalWidth == -1) || (originalHeight == -1))
+            return null;
+        float hh = 720f;
+        float ww = 480f;
+        int zoomRate = 1;
+        if (originalWidth > originalHeight && originalWidth > ww) {
+            zoomRate = (int) (originalWidth / ww);
+        } else if (originalWidth < originalHeight && originalHeight > hh) {
+            zoomRate = (int) (originalHeight / hh);
+        }
+        if (zoomRate <= 0)
+            zoomRate = 1;
+        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+        bitmapOptions.inSampleSize = zoomRate;
+        input = getContentResolver().openInputStream(uri);
+        Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
+        if (input != null) {
+            input.close();
+        }
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        if (bitmap != null) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        }
+        long currentTimeMillis = System.currentTimeMillis();
+        File outputImage = new File(getExternalCacheDir(), username + currentTimeMillis + ".jpg");
+        if (outputImage.exists()) {
+            boolean success = outputImage.delete();
+            if (!success) {
+                Log.i(TAG, "unable to delete temp image.");
+            }
+        }
+        if (outputImage.createNewFile()) {
+            FileOutputStream fileOutputStream = new FileOutputStream(outputImage);
+            fileOutputStream.write(byteArrayOutputStream.toByteArray());
+            fileOutputStream.flush();
+            fileOutputStream.close();
+        }
+        return outputImage;
+    }
+
+    private void uploadImage(File file) {
+        MediaType MEDIA_TYPE = MediaType.parse("application/octet-stream");
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.getName(), RequestBody.create(MEDIA_TYPE, file))
+                .build();
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(serverAddress + "upload/")
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String responseData = Objects.requireNonNull(response.body()).string();
+                String content = null;
+                try {
+                    JSONObject jsonObject = new JSONObject(responseData);
+                    content = jsonObject.getString("path");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                connection.sendMessage(content, "IMAGE");
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.i(TAG, e.toString());
+            }
+        });
     }
 
     @Override
@@ -142,15 +264,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void sendBtnClicked(boolean isTextMessage) {
-        if (isTextMessage) {
-            String messageContent = messageInput.getText().toString().trim();
-            if (messageContent.equals("")) return;
-            Log.i("send message", messageContent);
-            connection.sendMessage(messageContent, "TEXT");
-            messageInput.setText("");
-        }
-        // TODO: select image from phone, upload & then send image url.
+    private void sendTextMessage() {
+        String messageContent = messageInput.getText().toString().trim();
+        if (messageContent.equals("")) return;
+        Log.i(TAG, "send message: " + messageContent);
+        connection.sendMessage(messageContent, "TEXT");
+        messageInput.setText("");
+
     }
 
     private Emitter.Listener onConnect = new Emitter.Listener() {
@@ -204,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         content = data.getString("content");
                         sender = data.getString("sender");
                         type = data.getString("type");
-                        Log.i("receive message", data.toString());
+                        Log.i(TAG, "receive message: " + data.toString());
                         Message message = new Message(content, sender, type, username.equals(sender));
                         messageList.add(message);
                         messageAdapter.notifyItemInserted(messageList.size() - 1);

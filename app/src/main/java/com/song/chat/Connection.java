@@ -14,22 +14,16 @@ import io.socket.emitter.Emitter;
 
 class Connection {
     private static Connection instance = new Connection();
-    private String username;
     private String roomID;
     private Socket socket;
-    private boolean initialized;
 
     private Connection() {
-        initialized = false;
     }
 
     void init(String serverAddress, String username, String roomID,
               Emitter.Listener onConnect, Emitter.Listener onDisconnect,
               Emitter.Listener onConnectError, Emitter.Listener onMessage,
               Emitter.Listener onConflictUsername, Emitter.Listener onRegisterSuccess) {
-        //if(initialized) return;
-        initialized = true;
-        this.username = username;
         this.roomID = roomID;
         try {
             socket = IO.socket(serverAddress);

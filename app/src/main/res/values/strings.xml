@@ -17,7 +17,7 @@
     <string name="help_content">Usage: \nSend image: long press the send button.</string>
     <string name="server_label">Server Address</string>
     <string name="username_label">Username</string>
-    <string name="save_setting_btn">Save &amp; Restart</string>
+    <string name="save_setting_btn">Save</string>
     <string name="room_id_label">Room ID</string>
     <string name="room_id">Name</string>
     <string name="disconnect">Disconnected</string>
