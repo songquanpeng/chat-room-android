@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.song.chat">
-    <uses-permission
-        android:name="android.permission.INTERNET">
-    </uses-permission>
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -21,6 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".HelpActivity"
+            android:label="@string/title_activity_help" />
+        <activity
+            android:name=".SettingActivity"
+            android:label="@string/title_activity_setting" />
     </application>
 
 </manifest>
