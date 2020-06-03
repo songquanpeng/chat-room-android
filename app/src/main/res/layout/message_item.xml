@@ -10,24 +10,24 @@
         android:id="@+id/left_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
+        android:layout_gravity="start"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/tv_sender_name"
+            android:id="@+id/left_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="italic"/>
+            android:textStyle="bold"/>
 
         <LinearLayout
             android:id="@+id/left_content_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
             android:background="@drawable/message_left">
 
             <TextView
-                android:id="@+id/tv_left_msg"
+                android:id="@+id/left_text_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -35,7 +35,7 @@
                 android:textColor="@android:color/white"/>
 
             <ImageView
-                android:id="@+id/iv_left_msg"
+                android:id="@+id/left_image_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -49,23 +49,37 @@
         android:id="@+id/right_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:background="@drawable/message_right">
+        android:layout_gravity="end"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/right_content_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/message_right">
+
+            <TextView
+                android:id="@+id/right_text_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:textColor="@android:color/black"/>
+
+            <ImageView
+                android:id="@+id/right_image_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tv_right_msg"
+            android:id="@+id/right_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:textColor="@android:color/black"/>
-
-        <ImageView
-            android:id="@+id/iv_right_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"/>
+            android:textStyle="bold"/>
     </LinearLayout>
 
 </LinearLayout>

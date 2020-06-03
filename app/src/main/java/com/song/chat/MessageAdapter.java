@@ -25,22 +25,26 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         LinearLayout leftLayout;
         LinearLayout rightLayout;
         LinearLayout leftContentLayout;
-        TextView leftMsg;
-        TextView rightMsg;
+        LinearLayout rightContentLayout;
+        TextView leftTextMessage;
+        TextView rightTextMessage;
         TextView senderName;
-        ImageView leftPic;
-        ImageView rightPic;
+        TextView receiverName;
+        ImageView leftImageMessage;
+        ImageView rightImageMessage;
 
         ViewHolder(View view) {
             super(view);
             leftLayout = view.findViewById(R.id.left_layout);
             rightLayout = view.findViewById(R.id.right_layout);
-            leftMsg = view.findViewById(R.id.tv_left_msg);
-            rightMsg = view.findViewById(R.id.tv_right_msg);
+            leftTextMessage = view.findViewById(R.id.left_text_message);
+            rightTextMessage = view.findViewById(R.id.right_text_message);
             leftContentLayout = view.findViewById(R.id.left_content_layout);
-            senderName = view.findViewById(R.id.tv_sender_name);
-            leftPic = view.findViewById(R.id.iv_left_msg);
-            rightPic = view.findViewById(R.id.iv_right_msg);
+            rightContentLayout = view.findViewById(R.id.right_content_layout);
+            senderName = view.findViewById(R.id.left_name);
+            receiverName = view.findViewById(R.id.right_name);
+            leftImageMessage = view.findViewById(R.id.left_image_message);
+            rightImageMessage = view.findViewById(R.id.right_image_message);
         }
     }
 
@@ -70,31 +74,33 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
         switch (chatMessage.type) {
             case Message.TYPE_TEXT:
                 if (chatMessage.sendByMyself) {
-                    holder.rightMsg.setText(chatMessage.content);
-                    holder.rightPic.setVisibility(View.GONE);
+                    holder.rightTextMessage.setText(chatMessage.content);
+                    holder.receiverName.setText(chatMessage.sender);
+                    holder.rightImageMessage.setVisibility(View.GONE);
                 } else {
-                    holder.leftMsg.setText(chatMessage.content);
+                    holder.leftTextMessage.setText(chatMessage.content);
                     holder.senderName.setText(chatMessage.sender);
-                    holder.leftPic.setVisibility(View.GONE);
+                    holder.leftImageMessage.setVisibility(View.GONE);
                 }
                 break;
             case Message.TYPE_IMAGE:
                 if (chatMessage.sendByMyself) {
-                    holder.rightMsg.setVisibility(View.GONE);
+                    holder.receiverName.setText(chatMessage.sender);
+                    holder.rightTextMessage.setVisibility(View.GONE);
                     holder.rightLayout.setBackground(null);
                     try {
                         URL url = new URL(serverAddress + chatMessage.content);
-                        Glide.with(context).load(url).placeholder(R.mipmap.loading).into(holder.rightPic);
+                        Glide.with(context).load(url).placeholder(R.drawable.loading).into(holder.rightImageMessage);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } else {
                     holder.senderName.setText(chatMessage.sender);
-                    holder.leftMsg.setVisibility(View.GONE);
-                    holder.leftContentLayout.setBackground(null);
+                    holder.leftTextMessage.setVisibility(View.GONE);
+                    holder.leftLayout.setBackground(null);
                     try {
                         URL url = new URL(serverAddress + chatMessage.content);
-                        Glide.with(context).load(url).placeholder(R.mipmap.loading).into(holder.leftPic);
+                        Glide.with(context).load(url).placeholder(R.drawable.loading).into(holder.leftImageMessage);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
